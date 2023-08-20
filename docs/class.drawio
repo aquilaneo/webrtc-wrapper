@@ -1,0 +1,70 @@
+<mxfile host="Electron" modified="2023-08-20T05:58:04.527Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.6.8 Chrome/114.0.5735.289 Electron/25.5.0 Safari/537.36" etag="UvZJcHAClqytQceUjPJR" version="21.6.8" type="device">
+  <diagram name="ページ1" id="Ab8RkSCEwZd9pUnP1RaC">
+    <mxGraphModel dx="934" dy="1428" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-5" value="Connection" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="120" width="520" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-6" value="targetClientId: string&lt;br&gt;sendMediaChannels: Map&amp;lt;string, SendMediaChannel&amp;gt;&lt;br&gt;sendDataChannels: Map&amp;lt;string, SendDataChannel&amp;gt;&lt;br&gt;receiveMediaChannels: Map&amp;lt;string, ReceiveMediaChannel&amp;gt;&lt;br&gt;receiveDataChannels: Map&amp;lt;string, ReceiveMediaChannel&amp;gt;&lt;br&gt;onNewReceiveMediaChannel: (label: string, receiveMediaChannel: ReceiveMediaChannel)&lt;br&gt;onNewReceiveDataChannel: (label: string, receiveDataChannel: ReceiveDataChannel)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-5">
+          <mxGeometry y="26" width="520" height="134" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-7" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-5">
+          <mxGeometry y="160" width="520" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-8" value="constructor(targetClientId: string)&lt;br&gt;connect()&lt;br&gt;addSendMediaChannel(label: string, mediaChannel: MediaChannel)&lt;br&gt;getSendMediaChannel(label: string)&lt;br&gt;removeSendMediaChannel(label: string)&lt;br&gt;addSendDataChannel(label: string, dataChannel: DataChannel)&lt;br&gt;getSendDataChannel(label: string)&lt;br&gt;removeSendDataChannel(label: string)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-5">
+          <mxGeometry y="168" width="520" height="142" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-9" value="SendMediaChannel" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="480" width="360" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-10" value="mediaStream: MediaStream&lt;br&gt;_enable: boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-9">
+          <mxGeometry y="26" width="360" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-11" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-9">
+          <mxGeometry y="80" width="360" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-12" value="constructor(mediaStream, enabled)&lt;br&gt;get enable(): boolean&lt;br&gt;set enable(enable: boolean)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-9">
+          <mxGeometry y="88" width="360" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-13" value="SendDataChannel" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="480" width="360" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-14" value="reliability: DataChannelReliability" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-13">
+          <mxGeometry y="26" width="360" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-15" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-13">
+          <mxGeometry y="80" width="360" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-16" value="constructor(reliability: DataChannelReliability)&lt;br&gt;sendText(message: string)&lt;br&gt;sendArrayBuffer(message: ArrayBuffer)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-13">
+          <mxGeometry y="88" width="360" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-17" value="ReceiveMediaChannel" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="480" width="360" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-18" value="mediaStream: MediaStream&lt;br&gt;onEnableChanged: (enable: boolean) =&amp;gt; void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-17">
+          <mxGeometry y="26" width="360" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-19" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-17">
+          <mxGeometry y="80" width="360" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-20" value="constructor(mediaStream)&lt;br&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-17">
+          <mxGeometry y="88" width="360" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-21" value="ReceiveDataChannel" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1440" y="480" width="360" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-22" value="onTextMessage: (message: string) =&amp;gt; void&lt;br&gt;onArrayBufferMessage: (message: ArrayBuffer) =&amp;gt; void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-21">
+          <mxGeometry y="26" width="360" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-23" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-21">
+          <mxGeometry y="80" width="360" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Fa4Y31fhtpgDc50Y8iOu-24" value="constructor()" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="Fa4Y31fhtpgDc50Y8iOu-21">
+          <mxGeometry y="88" width="360" height="72" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
