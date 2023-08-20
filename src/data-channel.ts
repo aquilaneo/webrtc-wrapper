@@ -1,37 +1,60 @@
-// ===== 送信DataChannel =====
-export class SendDataChannel {
-    private reliability: DataChannelReliability;
+/**
+ * ===== 送信DataChannel =====
+ */
+export class DataChannel {
+    private dataChannel: RTCDataChannel;
+    public onTextMessage: (message: string) => void;
+    public onArrayBufferMessage: (message: ArrayBuffer) => void;
 
-    public constructor(reliability: DataChannelReliability) {
-        this.reliability = reliability;
-    }
+    /**
+     * コンストラクタ
+     * @param dataChannel 割り当てるRTCDataChannel
+     */
+    public constructor(dataChannel: RTCDataChannel) {
+        this.dataChannel = dataChannel;
 
-    // テキストを送信
-    public sendText(message: string) {
-
-    }
-
-    // ArrayBufferを送信
-    public sendArrayBuffer(message: ArrayBuffer) {
-
-    }
-}
-
-// ===== 受信DataChannel =====
-export class ReceiveDataChannel {
-    private onTextMessage: (message: string) => void;
-    private onArrayBufferMessage: (message: ArrayBuffer) => void;
-
-    public constructor() {
         // イベントハンドラ
         this.onTextMessage = () => {
         };
         this.onArrayBufferMessage = () => {
         };
-    }
-}
 
-// ===== DataChannelの信頼性設定 =====
-export interface DataChannelReliability {
-    reliability: boolean
+        this.dataChannel.onmessage = this.onMessageBase.bind(this);
+    }
+
+    /**
+     * テキストを送信
+     * @param message 送信するメッセージ文字列
+     */
+    public sendText(message: string) {
+        this.dataChannel.send(message);
+    }
+
+    /**
+     * ArrayBufferを送信
+     * @param message 送信するメッセージArrayBuffer
+     */
+    public sendArrayBuffer(message: ArrayBuffer) {
+        this.dataChannel.send(message);
+    }
+
+    /**
+     * メッセージ受信
+     * @param event 受信イベント
+     */
+    private onMessageBase(event: MessageEvent) {
+        // stringのメッセージ
+        if (typeof (event.data) === "string") {
+            this.onTextMessage(event.data);
+            return;
+        }
+        // ArrayBufferのメッセージ
+        if (event.data instanceof ArrayBuffer) {
+            this.onArrayBufferMessage(event.data);
+            return;
+        }
+
+        // 不明な型
+        console.error("不明なデータ形式を受信しました。");
+    }
 }

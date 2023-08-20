@@ -1,8 +1,15 @@
-// ===== 送信MediaChannel =====
+/**
+ * ===== 送信MediaChannel =====
+ */
 export class SendMediaChannel {
     private mediaStream: MediaStream;
     private _enable: boolean;
 
+    /**
+     * コンストラクタ
+     * @param mediaStream 割り当てるMediaStream
+     * @param enable 最初の有効/無効状態
+     */
     public constructor(mediaStream: MediaStream, enable: boolean) {
         this.mediaStream = mediaStream;
         this._enable = enable;
@@ -17,11 +24,17 @@ export class SendMediaChannel {
     }
 }
 
-// ===== 受信MediaChannel =====
+/**
+ * ===== 受信MediaChannel =====
+ */
 export class ReceiveMediaChannel {
     private mediaStream: MediaStream;
     private onEnableChanged: (enable: boolean) => void;
 
+    /**
+     * コンストラクタ
+     * @param mediaStream 割り当てるMediaStream
+     */
     public constructor(mediaStream: MediaStream) {
         this.mediaStream = mediaStream;
 
