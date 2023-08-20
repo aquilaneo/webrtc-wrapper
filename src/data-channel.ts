@@ -1,9 +1,15 @@
-// ===== 送信DataChannel =====
+/**
+ * ===== 送信DataChannel =====
+ */
 export class DataChannel {
     private dataChannel: RTCDataChannel;
     public onTextMessage: (message: string) => void;
     public onArrayBufferMessage: (message: ArrayBuffer) => void;
 
+    /**
+     * コンストラクタ
+     * @param dataChannel 割り当てるRTCDataChannel
+     */
     public constructor(dataChannel: RTCDataChannel) {
         this.dataChannel = dataChannel;
 
@@ -16,17 +22,26 @@ export class DataChannel {
         this.dataChannel.onmessage = this.onMessageBase.bind(this);
     }
 
-    // テキストを送信
+    /**
+     * テキストを送信
+     * @param message 送信するメッセージ文字列
+     */
     public sendText(message: string) {
         this.dataChannel.send(message);
     }
 
-    // ArrayBufferを送信
+    /**
+     * ArrayBufferを送信
+     * @param message 送信するメッセージArrayBuffer
+     */
     public sendArrayBuffer(message: ArrayBuffer) {
         this.dataChannel.send(message);
     }
 
-    // メッセージ受信
+    /**
+     * メッセージ受信
+     * @param event 受信イベント
+     */
     private onMessageBase(event: MessageEvent) {
         // stringのメッセージ
         if (typeof (event.data) === "string") {
