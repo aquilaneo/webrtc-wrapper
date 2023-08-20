@@ -53,9 +53,14 @@ export class SignalingManager {
         }
         await this.peerConnection.setLocalDescription(localSessionDescription);
 
-        // Vanilla ICEの場合はICE Gatheringの完了を待つ
+        // Vanilla ICEの場合はICE Gatheringの完了を待つ -> ICE Candidate入りのSessionDescriptionを取得
         if (this.iceMode === IceMode.VanillaIce) {
             await this.waitForIceGatheringComplete();
+            localSessionDescription = this.peerConnection.localDescription;
+            if (!localSessionDescription) {
+                console.error("Local Descriptionの取得に失敗しました。");
+                return "";
+            }
         }
 
         // SDP文字列を返す
@@ -80,7 +85,8 @@ export class SignalingManager {
     private async waitForIceGatheringComplete() {
         return new Promise<void>((resolve) => {
             this.peerConnection.onicecandidate = (event) => {
-                if (!event.candidate) {
+                // Gatheringが完了するとcandidateがnullになる
+                if (event.candidate === null) {
                     resolve();
                 }
             };
@@ -89,7 +95,7 @@ export class SignalingManager {
 }
 
 // ===== ICE処理のモード =====
-const IceMode = {
+export const IceMode = {
     VanillaIce: 0,
     TrickleIce: 1
 } as const;
