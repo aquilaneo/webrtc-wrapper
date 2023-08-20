@@ -1,27 +1,43 @@
 import { ReceiveMediaChannel, SendMediaChannel } from "./media-channel.ts";
 import { ReceiveDataChannel, SendDataChannel } from "./data-channel.ts";
+import { SignalingManager, IceMode } from "./signaling.ts";
 
 export class Connection {
     private targetClientId: string;
+    private signalingManager: SignalingManager;
     private sendMediaChannels: Map<string, SendMediaChannel>;
     private receiveMediaChannels: Map<string, ReceiveMediaChannel>;
     private sendDataChannels: Map<string, SendDataChannel>;
     private receiveDataChannels: Map<string, ReceiveDataChannel>;
+    private applicationDataChannel: RTCDataChannel | null;
 
-    private peerConnection: RTCPeerConnection;
+    private readonly peerConnection: RTCPeerConnection;
 
     // イベントハンドラ
     public onNewReceiveMediaChannel: (label: string, receiveMediaChannel: ReceiveMediaChannel) => void;
     public onNewReceiveDataChannel: (label: string, receiveDataChannel: ReceiveDataChannel) => void;
 
-    public constructor(targetClientId: string) {
+    public constructor(targetClientId: string, iceMode: IceMode) {
+        this.peerConnection = new RTCPeerConnection({
+            iceServers: [
+                { urls: ["stun:stun.l.google.com:19302"] }
+            ]
+        });
+
+        // TODO: あとでクラス化
+        this.applicationDataChannel = this.peerConnection.createDataChannel("application", {
+            id: 0, negotiated: true
+        });
+        this.applicationDataChannel.onmessage = (event) => {
+            console.log(event.data);
+        }
+
         this.targetClientId = targetClientId;
+        this.signalingManager = new SignalingManager(this.peerConnection, iceMode);
         this.sendMediaChannels = new Map<string, SendMediaChannel>();
         this.receiveMediaChannels = new Map<string, ReceiveMediaChannel>();
         this.sendDataChannels = new Map<string, SendDataChannel>();
         this.receiveDataChannels = new Map<string, ReceiveDataChannel>();
-
-        this.peerConnection = new RTCPeerConnection();
 
         // イベントハンドラ
         this.onNewReceiveMediaChannel = () => {
@@ -30,9 +46,23 @@ export class Connection {
         };
     }
 
-    // P2P接続を開始する
-    public connect() {
+    // offerとしてP2P接続を開始する
+    // TODO: 戻り値を消す
+    public async connectAsOffer() {
+        return await this.signalingManager.createOffer();
+    }
 
+    // 相手のanswerを登録する
+    // TODO: 消す
+    public async setRemoteAnswer(remoteAnswerSdp: string) {
+        await this.signalingManager.setRemoteAnswer(remoteAnswerSdp);
+    }
+
+    // answerとしてP2P接続を開始する
+    // TODO: 戻り値・引数を消す
+    public async connectAsAnswer(remoteOfferSdp: string) {
+        await this.signalingManager.setRemoteOffer(remoteOfferSdp);
+        return await this.signalingManager.createAnswer();
     }
 
     // SendMediaChannelを追加する
@@ -142,5 +172,15 @@ export class Connection {
         }
 
         this.receiveDataChannels.delete(label);
+    }
+
+    // テスト用DataChannel送信
+    // TODO: 消す
+    public sendApplicationDataChannel(message: string) {
+        if (!this.applicationDataChannel) {
+            return;
+        }
+
+        this.applicationDataChannel.send(message);
     }
 }
