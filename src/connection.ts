@@ -1,21 +1,20 @@
 import { ReceiveMediaChannel, SendMediaChannel } from "./media-channel.ts";
-import { ReceiveDataChannel, SendDataChannel } from "./data-channel.ts";
-import { SignalingManager, IceMode } from "./signaling.ts";
+import { DataChannel } from "./data-channel.ts";
+import { IceMode, SignalingManager } from "./signaling.ts";
 
 export class Connection {
     private targetClientId: string;
     private signalingManager: SignalingManager;
     private sendMediaChannels: Map<string, SendMediaChannel>;
     private receiveMediaChannels: Map<string, ReceiveMediaChannel>;
-    private sendDataChannels: Map<string, SendDataChannel>;
-    private receiveDataChannels: Map<string, ReceiveDataChannel>;
-    private applicationDataChannel: RTCDataChannel | null;
+    private dataChannels: Map<string, DataChannel>;
+    private applicationDataChannel: DataChannel;
 
     private readonly peerConnection: RTCPeerConnection;
 
     // イベントハンドラ
     public onNewReceiveMediaChannel: (label: string, receiveMediaChannel: ReceiveMediaChannel) => void;
-    public onNewReceiveDataChannel: (label: string, receiveDataChannel: ReceiveDataChannel) => void;
+    public onNewDataChannel: (label: string, dataChannel: DataChannel) => void;
 
     public constructor(targetClientId: string, iceMode: IceMode) {
         this.peerConnection = new RTCPeerConnection({
@@ -24,25 +23,26 @@ export class Connection {
             ]
         });
 
-        // TODO: あとでクラス化
-        this.applicationDataChannel = this.peerConnection.createDataChannel("application", {
+        // アプリケーション用DataChannel
+        const rtcDataChannel = this.peerConnection.createDataChannel("application", {
             id: 0, negotiated: true
         });
-        this.applicationDataChannel.onmessage = (event) => {
-            console.log(event.data);
-        }
+        this.applicationDataChannel = new DataChannel(rtcDataChannel);
+        this.applicationDataChannel.onTextMessage = (message: string) => {
+            console.log(message);
+        };
+
 
         this.targetClientId = targetClientId;
         this.signalingManager = new SignalingManager(this.peerConnection, iceMode);
         this.sendMediaChannels = new Map<string, SendMediaChannel>();
         this.receiveMediaChannels = new Map<string, ReceiveMediaChannel>();
-        this.sendDataChannels = new Map<string, SendDataChannel>();
-        this.receiveDataChannels = new Map<string, ReceiveDataChannel>();
+        this.dataChannels = new Map<string, DataChannel>();
 
         // イベントハンドラ
         this.onNewReceiveMediaChannel = () => {
         };
-        this.onNewReceiveDataChannel = () => {
+        this.onNewDataChannel = () => {
         };
     }
 
@@ -83,9 +83,9 @@ export class Connection {
 
     // SendMediaChannelを削除する
     public removeSendMediaChannel(label: string) {
-        // すでに存在していたら何もしない
-        if (this.sendMediaChannels.has(label)) {
-            console.error(`${label}はすでに存在します。`);
+        // 存在しなかったら何もしない
+        if (!this.sendMediaChannels.has(label)) {
+            console.error(`${label}は存在しません。`);
             return;
         }
 
@@ -110,68 +110,44 @@ export class Connection {
 
     // ReceiveMediaChannelを削除する
     private removeReceiveMediaChannel(label: string) {
-        // すでに存在していたら何もしない
-        if (this.receiveMediaChannels.has(label)) {
-            console.error(`${label}はすでに存在します。`);
+        // 存在しなかったら何もしない
+        if (!this.receiveMediaChannels.has(label)) {
+            console.error(`${label}は存在しません。`);
             return;
         }
 
         this.receiveMediaChannels.delete(label);
     }
 
-    // SendDataChannelを追加する
-    public addSendDataChannel(label: string, sendDataChannel: SendDataChannel) {
+    // DataChannelを作成する
+    public createDataChannel(label: string) {
         // すでに存在していたら何もしない
-        if (this.sendDataChannels.has(label)) {
+        if (this.dataChannels.has(label)) {
             console.error(`${label}はすでに存在します。`);
             return;
         }
 
-        this.sendDataChannels.set(label, sendDataChannel);
+        const rtcDataChannel = this.peerConnection.createDataChannel(label);
+        const dataChannel = new DataChannel(rtcDataChannel);
+        this.dataChannels.set(label, dataChannel);
 
+        return dataChannel;
     }
 
-    // SendDataChannelを取得する
-    public getSendDataChannel(label: string) {
-        return this.sendDataChannels.get(label);
+    // DataChannelを取得する
+    public getDataChannel(label: string) {
+        return this.dataChannels.get(label);
     }
 
-    // SendDataChannelを削除する
-    public removeDataMediaChannel(label: string) {
-        // すでに存在していたら何もしない
-        if (this.sendDataChannels.has(label)) {
-            console.error(`${label}はすでに存在します。`);
+    // DataChannelを削除する
+    public removeDataChannel(label: string) {
+        // 存在しなかったら何もしない
+        if (!this.dataChannels.has(label)) {
+            console.error(`${label}は存在しません。`);
             return;
         }
 
-        this.sendDataChannels.delete(label);
-    }
-
-    // ReceiveDataChannelを追加する
-    private addReceiveDataChannel(label: string, receiveDataChannel: ReceiveDataChannel) {
-        // すでに存在していたら何もしない
-        if (this.receiveDataChannels.has(label)) {
-            console.error(`${label}はすでに存在します。`);
-            return;
-        }
-
-        this.receiveDataChannels.set(label, receiveDataChannel);
-    }
-
-    // ReceiveDataChannelを取得する
-    public getReceivedDataChannel(label: string) {
-        return this.receiveDataChannels.get(label);
-    }
-
-    // ReceiveDataChannelを削除する
-    private removeReceiveDataChannel(label: string) {
-        // すでに存在していたら何もしない
-        if (this.receiveDataChannels.has(label)) {
-            console.error(`${label}はすでに存在します。`);
-            return;
-        }
-
-        this.receiveDataChannels.delete(label);
+        this.dataChannels.delete(label);
     }
 
     // テスト用DataChannel送信
@@ -181,6 +157,6 @@ export class Connection {
             return;
         }
 
-        this.applicationDataChannel.send(message);
+        this.applicationDataChannel.sendText(message);
     }
 }
