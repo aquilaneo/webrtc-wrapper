@@ -41,6 +41,11 @@ function initialize() {
             connection.sendApplicationDataChannel("Test");
         };
     }
+
+    // 切断処理
+    window.onbeforeunload = () => {
+        connection.closeConnection();
+    };
 }
 
 initialize();
