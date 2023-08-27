@@ -1,25 +1,50 @@
+import { DataChannel } from "./data-channel.ts";
+
 /**
  * ===== シグナリング関連クラス =====
  */
 export class SignalingManager {
     private peerConnection: RTCPeerConnection;
+    private readonly signalingDataChannel: DataChannel;
     private readonly iceMode: IceMode;
 
     /**
      * コンストラクタ
      * @param peerConnection 対応させるRTCPeerConnection
+     * @param signalingDataChannel シグナリング用DataChannel
      * @param iceMode シグナリングに VanillaICE と TricleICE のどちらを使うか
      */
-    public constructor(peerConnection: RTCPeerConnection, iceMode: IceMode) {
+    public constructor(peerConnection: RTCPeerConnection, signalingDataChannel: DataChannel, iceMode: IceMode) {
         this.peerConnection = peerConnection;
+        this.signalingDataChannel = signalingDataChannel;
+        this.signalingDataChannel.onTextMessage = this.handleSignalingMessage;
         this.iceMode = iceMode;
     }
 
     /**
-     * offerとしてシグナリングを行う
+     * 自動再シグナリングを有効化する
      */
-    public executeSignalingAsOffer() {
+    public enableAutoReSignaling() {
+        this.peerConnection.onnegotiationneeded = this.executeSignalingAsOffer;
+    }
 
+    /**
+     * offerとしてシグナリングを行う
+     * @return { Promise<void> }
+     */
+    public async executeSignalingAsOffer() {
+        const sdp = await this.createOffer();
+
+        if (!this.signalingDataChannel.isOpen()) {
+            // シグナリング用DataChannel開通前
+        } else {
+            // シグナリング用DataChannel開通後
+            const signalingMessage: SignalingMessage = {
+                offerOrAnswer: SignalingRole.Offer,
+                sdp: sdp
+            };
+            this.signalingDataChannel.sendText(JSON.stringify(signalingMessage));
+        }
     }
 
     /**
@@ -35,7 +60,7 @@ export class SignalingManager {
      * TODO: privateにする
      */
     public async createOffer() {
-        return await this.createLocalSessionDescriptionBase("offer");
+        return await this.createLocalSessionDescriptionBase(SignalingRole.Offer);
     }
 
     /**
@@ -44,7 +69,7 @@ export class SignalingManager {
      * TODO: privateにする
      */
     public async setRemoteOffer(sdp: string) {
-        await this.setRemoteSessionDescriptionBase(sdp, "offer");
+        await this.setRemoteSessionDescriptionBase(sdp, SignalingRole.Offer);
     }
 
     /**
@@ -53,7 +78,7 @@ export class SignalingManager {
      * TODO: privateにする
      */
     public async createAnswer() {
-        return await this.createLocalSessionDescriptionBase("answer");
+        return await this.createLocalSessionDescriptionBase(SignalingRole.Answer);
     }
 
     /**
@@ -62,18 +87,18 @@ export class SignalingManager {
      * TODO: privateにする
      */
     public async setRemoteAnswer(sdp: string) {
-        await this.setRemoteSessionDescriptionBase(sdp, "answer");
+        await this.setRemoteSessionDescriptionBase(sdp, SignalingRole.Answer);
     }
 
     /**
      * 自分のoffer/answer作成の基底
-     * @param type offerかanswerか
+     * @param signalingRole offerかanswerか
      * @return {Promise<string>} SDP文字列
      */
-    private async createLocalSessionDescriptionBase(type: "offer" | "answer") {
+    private async createLocalSessionDescriptionBase(signalingRole: SignalingRole) {
         // offer/answerのlocal descriptionを作成する
         let localSessionDescription;
-        if (type === "offer") {
+        if (signalingRole === SignalingRole.Offer) {
             localSessionDescription = await this.peerConnection.createOffer();
         } else {
             localSessionDescription = await this.peerConnection.createAnswer();
@@ -101,12 +126,12 @@ export class SignalingManager {
     /**
      * 相手のoffer/answer登録の基底
      * @param sdp 相手のSDP文字列
-     * @param type offerかanswerか
+     * @param signalingRole offerかanswerか
      */
-    private async setRemoteSessionDescriptionBase(sdp: string, type: "offer" | "answer") {
+    private async setRemoteSessionDescriptionBase(sdp: string, signalingRole: SignalingRole) {
         // 渡されたSDP文字列を元にoffer/answerのremote descriptionを作成し登録する
         const remoteSessionDescription = new RTCSessionDescription({
-            type: type,
+            type: signalingRole === SignalingRole.Offer ? "offer" : "answer",
             sdp: sdp
         });
         await this.peerConnection.setRemoteDescription(remoteSessionDescription);
@@ -117,6 +142,12 @@ export class SignalingManager {
      */
     private async waitForIceGatheringComplete() {
         return new Promise<void>((resolve) => {
+            // 接続完了していたら即終了
+            if (this.peerConnection.iceConnectionState === "completed") {
+                resolve();
+            }
+
+            // ICE完了待ち
             this.peerConnection.onicecandidate = (event) => {
                 // Gatheringが完了するとcandidateがnullになる
                 if (event.candidate === null) {
@@ -124,6 +155,21 @@ export class SignalingManager {
                 }
             };
         });
+    }
+
+    /**
+     * シグナリングメッセージの受信
+     * @return { Promise<void> }
+     */
+    private async handleSignalingMessage(message: string) {
+        const parsed = JSON.parse(message) as SignalingMessage;
+        if (parsed.offerOrAnswer === SignalingRole.Offer) {
+            // Offerからのメッセージ
+            await this.setRemoteOffer(parsed.sdp);
+        } else {
+            // Answerからのメッセージ
+            await this.setRemoteAnswer(parsed.sdp);
+        }
     }
 }
 
@@ -135,3 +181,18 @@ export const IceMode = {
     TrickleIce: 1
 } as const;
 export type IceMode = (typeof IceMode)[keyof typeof IceMode];
+
+// ===== シグナリングのロール =====
+export const SignalingRole = {
+    Offer: 0,
+    Answer: 1,
+} as const;
+export type SignalingRole = (typeof SignalingRole)[keyof typeof SignalingRole];
+
+/**
+ * ===== シグナリング用メッセージインターフェース =====
+ */
+interface SignalingMessage {
+    offerOrAnswer: SignalingRole,
+    sdp: string
+}

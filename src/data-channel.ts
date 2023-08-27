@@ -2,7 +2,7 @@
  * ===== 送信DataChannel =====
  */
 export class DataChannel {
-    private dataChannel: RTCDataChannel;
+    public readonly dataChannel: RTCDataChannel;
     public onTextMessage: (message: string) => void;
     public onArrayBufferMessage: (message: ArrayBuffer) => void;
 
@@ -56,5 +56,13 @@ export class DataChannel {
 
         // 不明な型
         console.error("不明なデータ形式を受信しました。");
+    }
+
+    /**
+     * DataChannel開通しているかどうか
+     * @return boolean true: 開通, false: 未開通
+     */
+    public isOpen() {
+        return this.dataChannel.readyState === "open";
     }
 }

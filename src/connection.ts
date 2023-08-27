@@ -33,20 +33,32 @@ export class Connection {
         });
 
         // アプリケーション用DataChannel
-        const rtcDataChannel = this.peerConnection.createDataChannel("application", {
+        const rawApplicationDataChannel = this.peerConnection.createDataChannel("application", {
             id: 0, negotiated: true
         });
-        this.applicationDataChannel = new DataChannel(rtcDataChannel);
+        this.applicationDataChannel = new DataChannel(rawApplicationDataChannel);
         this.applicationDataChannel.onTextMessage = (message: string) => {
             console.log(message);
         };
 
+        // シグナリング用DataChannel
+        const rawSignalingDataChannel = this.peerConnection.createDataChannel("signaling", {
+            id: 1, negotiated: true
+        });
+        this.signalingDataChannel = new DataChannel(rawSignalingDataChannel);
 
         this.targetClientId = targetClientId;
-        this.signalingManager = new SignalingManager(this.peerConnection, iceMode);
+        this.signalingManager = new SignalingManager(this.peerConnection, this.signalingDataChannel, iceMode);
         this.sendMediaChannels = new Map<string, SendMediaChannel>();
         this.receiveMediaChannels = new Map<string, ReceiveMediaChannel>();
         this.dataChannels = new Map<string, DataChannel>();
+
+        // 接続完了したら自動再シグナリングを有効にする
+        this.peerConnection.onconnectionstatechange = () => {
+            if (this.peerConnection?.connectionState === "connected") {
+                this.signalingManager.enableAutoReSignaling();
+            }
+        };
 
         // イベントハンドラ
         this.onNewReceiveMediaChannel = () => {
@@ -175,7 +187,7 @@ export class Connection {
      * @return {DataChannel | undefined} 作成したDataChannel
      */
     public createDataChannel(label: string) {
-        if(!this.peerConnection) {
+        if (!this.peerConnection) {
             return;
         }
 
