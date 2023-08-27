@@ -2,7 +2,7 @@
  * ===== 送信MediaChannel =====
  */
 export class SendMediaChannel {
-    private mediaStream: MediaStream;
+    public readonly mediaStream: MediaStream;
     private _enable: boolean;
 
     /**

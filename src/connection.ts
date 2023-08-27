@@ -65,6 +65,10 @@ export class Connection {
         };
         this.onNewDataChannel = () => {
         };
+
+        this.peerConnection.ontrack = (e) => {
+            console.log(e);
+        }
     }
 
     /**
@@ -111,6 +115,10 @@ export class Connection {
      * @param sendMediaChannel 追加するSendMediaChannel
      */
     public addSendMediaChannel(label: string, sendMediaChannel: SendMediaChannel) {
+        if (!this.peerConnection) {
+            return;
+        }
+
         // すでに存在していたら何もしない
         if (this.sendMediaChannels.has(label)) {
             console.error(`${label}はすでに存在します。`);
@@ -118,6 +126,12 @@ export class Connection {
         }
 
         this.sendMediaChannels.set(label, sendMediaChannel);
+
+        // 送信処理
+        const mediaStream = sendMediaChannel.mediaStream;
+        for (const track of mediaStream.getTracks()) {
+            this.peerConnection.addTrack(track, mediaStream);
+        }
     }
 
     /**
