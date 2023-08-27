@@ -17,7 +17,7 @@ export class SignalingManager {
     public constructor(peerConnection: RTCPeerConnection, signalingDataChannel: DataChannel, iceMode: IceMode) {
         this.peerConnection = peerConnection;
         this.signalingDataChannel = signalingDataChannel;
-        this.signalingDataChannel.onTextMessage = this.handleSignalingMessage;
+        this.signalingDataChannel.onTextMessage = this.handleSignalingMessage.bind(this);
         this.iceMode = iceMode;
     }
 
@@ -25,7 +25,7 @@ export class SignalingManager {
      * 自動再シグナリングを有効化する
      */
     public enableAutoReSignaling() {
-        this.peerConnection.onnegotiationneeded = this.executeSignalingAsOffer;
+        this.peerConnection.onnegotiationneeded = this.executeSignalingAsOffer.bind(this);
     }
 
     /**
@@ -143,7 +143,8 @@ export class SignalingManager {
     private async waitForIceGatheringComplete() {
         return new Promise<void>((resolve) => {
             // 接続完了していたら即終了
-            if (this.peerConnection.iceConnectionState === "completed") {
+            if (this.peerConnection.iceConnectionState === "connected"
+                || this.peerConnection.iceConnectionState === "completed") {
                 resolve();
             }
 

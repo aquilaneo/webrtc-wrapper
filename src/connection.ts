@@ -115,6 +115,10 @@ export class Connection {
      * @param sendMediaChannel 追加するSendMediaChannel
      */
     public addSendMediaChannel(label: string, sendMediaChannel: SendMediaChannel) {
+        if (!this.peerConnection) {
+            return;
+        }
+
         // すでに存在していたら何もしない
         if (this.sendMediaChannels.has(label)) {
             console.error(`${label}はすでに存在します。`);
