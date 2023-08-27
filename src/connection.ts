@@ -11,9 +11,10 @@ export class Connection {
     private sendMediaChannels: Map<string, SendMediaChannel>;
     private receiveMediaChannels: Map<string, ReceiveMediaChannel>;
     private dataChannels: Map<string, DataChannel>;
-    private applicationDataChannel: DataChannel;
+    private readonly applicationDataChannel: DataChannel;
+    private readonly signalingDataChannel: DataChannel;
 
-    private readonly peerConnection: RTCPeerConnection;
+    private peerConnection: RTCPeerConnection | null;
 
     // イベントハンドラ
     public onNewReceiveMediaChannel: (label: string, receiveMediaChannel: ReceiveMediaChannel) => void;
@@ -52,6 +53,19 @@ export class Connection {
         };
         this.onNewDataChannel = () => {
         };
+    }
+
+    /**
+     * 接続終了
+     */
+    public closeConnection() {
+        if (!this.peerConnection) {
+            return;
+        }
+
+        // 切断処理
+        this.peerConnection.close();
+        this.peerConnection = null;
     }
 
     /**
@@ -161,6 +175,10 @@ export class Connection {
      * @return {DataChannel | undefined} 作成したDataChannel
      */
     public createDataChannel(label: string) {
+        if(!this.peerConnection) {
+            return;
+        }
+
         // すでに存在していたら何もしない
         if (this.dataChannels.has(label)) {
             console.error(`${label}はすでに存在します。`);
