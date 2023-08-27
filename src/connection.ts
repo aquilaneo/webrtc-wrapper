@@ -65,6 +65,10 @@ export class Connection {
         };
         this.onNewDataChannel = () => {
         };
+
+        this.peerConnection.ontrack = (e) => {
+            console.log(e);
+        }
     }
 
     /**
@@ -118,6 +122,12 @@ export class Connection {
         }
 
         this.sendMediaChannels.set(label, sendMediaChannel);
+
+        // 送信処理
+        const mediaStream = sendMediaChannel.mediaStream;
+        for (const track of mediaStream.getTracks()) {
+            this.peerConnection.addTrack(track, mediaStream);
+        }
     }
 
     /**

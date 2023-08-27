@@ -3,6 +3,22 @@
 <head>
 	<meta charset="UTF-8"/>
 	<title>WebRTC wrapper</title>
+
+	<style>
+        #remote-video {
+            width: 640px;
+            height: 360px;
+            background-color: black;
+			position: absolute;
+        }
+
+        #local-video {
+            width: 128px;
+            height: 72px;
+            background-color: red;
+			position: absolute;
+        }
+	</style>
 </head>
 <body>
 <div>
@@ -15,7 +31,15 @@
 		<button id="set-remote-answer-button">相手のAnswerを登録</button>
 	</div>
 	<div>
+		<button id="enable-camera-button">カメラ有効化</button>
+	</div>
+	<div>
 		<button id="send-text-button">テストメッセージ送信</button>
+	</div>
+
+	<div style="margin-top: 1rem;">
+		<video id="remote-video"></video>
+		<video id="local-video"></video>
 	</div>
 </div>
 <script type="module" src="/src/main.ts"></script>

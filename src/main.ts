@@ -1,5 +1,6 @@
 import { Connection } from "./connection.ts";
 import { IceMode } from "./signaling.ts";
+import { SendMediaChannel } from "./media-channel.ts";
 
 function initialize() {
     const connection = new Connection("", IceMode.VanillaIce);
@@ -31,6 +32,16 @@ function initialize() {
         setAnswerButton.onclick = async () => {
             const answerSdp = await navigator.clipboard.readText();
             await connection.setRemoteAnswer(answerSdp);
+        };
+    }
+
+    // カメラ有効化ボタン
+    const enableCameraButton = document.getElementById("enable-camera-button");
+    if (enableCameraButton) {
+        enableCameraButton.onclick = async () => {
+            const mediaStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+            const sendMediaChannel = new SendMediaChannel(mediaStream, true);
+            connection.addSendMediaChannel("camera", sendMediaChannel);
         };
     }
 
