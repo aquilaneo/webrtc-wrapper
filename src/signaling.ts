@@ -33,25 +33,40 @@ export class SignalingManager {
      * @return { Promise<void> }
      */
     public async executeSignalingAsOffer() {
-        const sdp = await this.createOffer();
+        await this.executeSignalingBase(SignalingRole.Offer);
+    }
+
+    /**
+     * answerとしてシグナリングを行う
+     */
+    public async executeSignalingAsAnswer() {
+        await this.executeSignalingBase(SignalingRole.Answer);
+    }
+
+    /**
+     * シグナリング処理の基底
+     * @param role Offer or Answer
+     */
+    private async executeSignalingBase(role: SignalingRole) {
+        let sdp: string;
+        if (role === SignalingRole.Offer) {
+            // Offer作成
+            sdp = await this.createOffer();
+        } else {
+            // Answer作成
+            sdp = await this.createAnswer();
+        }
 
         if (!this.signalingDataChannel.isOpen()) {
             // シグナリング用DataChannel開通前
         } else {
             // シグナリング用DataChannel開通後
             const signalingMessage: SignalingMessage = {
-                offerOrAnswer: SignalingRole.Offer,
+                offerOrAnswer: role,
                 sdp: sdp
             };
             this.signalingDataChannel.sendText(JSON.stringify(signalingMessage));
         }
-    }
-
-    /**
-     * answerとしてシグナリングを行う
-     */
-    public executeSignalingAsAnswer() {
-
     }
 
     /**
@@ -167,6 +182,8 @@ export class SignalingManager {
         if (parsed.offerOrAnswer === SignalingRole.Offer) {
             // Offerからのメッセージ
             await this.setRemoteOffer(parsed.sdp);
+            // Answerを返信
+            await this.executeSignalingAsAnswer();
         } else {
             // Answerからのメッセージ
             await this.setRemoteAnswer(parsed.sdp);
@@ -183,7 +200,9 @@ export const IceMode = {
 } as const;
 export type IceMode = (typeof IceMode)[keyof typeof IceMode];
 
-// ===== シグナリングのロール =====
+/**
+ * ===== シグナリングのロール =====
+ */
 export const SignalingRole = {
     Offer: 0,
     Answer: 1,
