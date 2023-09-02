@@ -70,6 +70,7 @@ export class Connection {
             console.log(e);
             const elem = document.getElementById("remote-video") as HTMLVideoElement;
             elem.srcObject = e.streams[0];
+            elem.muted = true;
             elem.ondurationchange = () => {
                 elem.play();
             };
