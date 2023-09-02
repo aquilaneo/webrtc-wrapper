@@ -28,7 +28,7 @@ export class Connection {
     public constructor(targetClientId: string, iceMode: IceMode) {
         this.peerConnection = new RTCPeerConnection({
             iceServers: [
-                { urls: ["stun:stun.l.google.com:19302"] }
+                { urls: ["stun:stun.services.mozilla.com:3478"] }
             ]
         });
 
@@ -68,6 +68,11 @@ export class Connection {
 
         this.peerConnection.ontrack = (e) => {
             console.log(e);
+            const elem = document.getElementById("remote-video") as HTMLVideoElement;
+            elem.srcObject = e.streams[0];
+            elem.ondurationchange = () => {
+                elem.play();
+            };
         }
     }
 
