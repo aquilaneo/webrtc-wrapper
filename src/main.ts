@@ -39,7 +39,14 @@ function initialize() {
     const enableCameraButton = document.getElementById("enable-camera-button");
     if (enableCameraButton) {
         enableCameraButton.onclick = async () => {
-            const mediaStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+            const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const localVideoElem = document.getElementById("local-video") as HTMLVideoElement;
+            localVideoElem.srcObject = mediaStream;
+            localVideoElem.muted = true;
+            localVideoElem.ondurationchange = () => {
+                localVideoElem.play();
+            };
+
             const sendMediaChannel = new SendMediaChannel(mediaStream, true);
             connection.addSendMediaChannel("camera", sendMediaChannel);
         };
