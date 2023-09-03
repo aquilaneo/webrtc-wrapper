@@ -5,17 +5,19 @@ export class SendMediaChannel {
     public readonly mediaStream: MediaStream;
     private _enable: boolean;
     public readonly mediaCodecPriority: MediaCodecPriority | undefined;
+    public readonly targetMediaBitrate: TargetMediaBitrate | undefined;
 
     /**
      * コンストラクタ
      * @param mediaStream 割り当てるMediaStream
      * @param enable 最初の有効/無効状態
-     * @param mediaCodecPriority 使用するメディアコーデックの優先順位
+     * @param options SendMediaChannelのオプション
      */
-    public constructor(mediaStream: MediaStream, enable: boolean, mediaCodecPriority?: MediaCodecPriority) {
+    public constructor(mediaStream: MediaStream, enable: boolean, options?: SendMediaChannelOption) {
         this.mediaStream = mediaStream;
         this._enable = enable;
-        this.mediaCodecPriority = mediaCodecPriority;
+        this.mediaCodecPriority = options?.mediaCodecPriority;
+        this.targetMediaBitrate = options?.targetMediaBitrate;
     }
 
     public get enable() {
@@ -47,6 +49,12 @@ export class ReceiveMediaChannel {
     }
 }
 
+// ===== SendMediaChannelのオプション =====
+interface SendMediaChannelOption {
+    mediaCodecPriority?: MediaCodecPriority,
+    targetMediaBitrate?: TargetMediaBitrate,
+}
+
 /**
  * ===== メディアコーデックの優先順位 =====
  */
@@ -75,3 +83,10 @@ export const AudioCodec = {
 } as const;
 export type AudioCodec = (typeof AudioCodec)[keyof typeof AudioCodec];
 
+/**
+ * ===== メディアの目標ビットレート[kbps] =====
+ */
+interface TargetMediaBitrate {
+    video?: number,
+    audio?: number,
+}

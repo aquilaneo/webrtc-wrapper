@@ -119,7 +119,7 @@ export class Connection {
      * @param label 追加するMediaChannelのラベル文字列
      * @param sendMediaChannel 追加するSendMediaChannel
      */
-    public addSendMediaChannel(label: string, sendMediaChannel: SendMediaChannel) {
+    public async addSendMediaChannel(label: string, sendMediaChannel: SendMediaChannel) {
         if (!this.peerConnection) {
             return;
         }
@@ -154,6 +154,21 @@ export class Connection {
             } else if (sender.track?.kind === "audio" && sendMediaChannel.mediaCodecPriority?.audio) {
                 this.setMediaChannelAudioCodec(targetTransceiver, sendMediaChannel.mediaCodecPriority.audio);
             }
+        }
+
+        // 新しく作られたSenderに目標ビットレートを指定する
+        for (const sender of newSenders) {
+            if (!sendMediaChannel.targetMediaBitrate?.video && !sendMediaChannel.targetMediaBitrate?.audio) {
+                continue;
+            }
+
+            const parameters = sender.getParameters();
+            if (sender.track?.kind === "video" && sendMediaChannel.targetMediaBitrate?.video) {
+                parameters.encodings[0].maxBitrate = sendMediaChannel.targetMediaBitrate.video * 1024;
+            } else if (sender.track?.kind === "audio" && sendMediaChannel.targetMediaBitrate?.audio) {
+                parameters.encodings[0].maxBitrate = sendMediaChannel.targetMediaBitrate.audio * 1024;
+            }
+            await sender.setParameters(parameters);
         }
     }
 
