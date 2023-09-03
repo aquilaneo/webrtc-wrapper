@@ -141,28 +141,18 @@ export class Connection {
         }
 
         // 新しく作られたSenderにコーデックの指定を適用する
-        const transceivers = this.peerConnection.getTransceivers()
         for (const sender of newSenders) {
             // senderから対応するTransceiverを取得する
-            const targetTransceiver = transceivers.find((item) => {
-                return item.sender === sender;
-            });
+            const targetTransceiver = this.findSenderFromTransceiver(sender);
             if (!targetTransceiver) {
                 continue;
             }
 
             // メディアタイプで分岐
-            switch (sender.track?.kind) {
-                case "video":
-                    if (sendMediaChannel.mediaCodecPriority?.video) {
-                        this.setMediaChannelVideoCodec(targetTransceiver, sendMediaChannel.mediaCodecPriority.video);
-                    }
-                    break;
-                case "audio":
-                    if (sendMediaChannel.mediaCodecPriority?.audio) {
-                        this.setMediaChannelAudioCodec(targetTransceiver, sendMediaChannel.mediaCodecPriority.audio);
-                    }
-                    break;
+            if (sender.track?.kind === "video" && sendMediaChannel.mediaCodecPriority?.video) {
+                this.setMediaChannelVideoCodec(targetTransceiver, sendMediaChannel.mediaCodecPriority.video);
+            } else if (sender.track?.kind === "audio" && sendMediaChannel.mediaCodecPriority?.audio) {
+                this.setMediaChannelAudioCodec(targetTransceiver, sendMediaChannel.mediaCodecPriority.audio);
             }
         }
     }
@@ -228,7 +218,11 @@ export class Connection {
         this.receiveMediaChannels.delete(label);
     }
 
-    // 送信動画コーデックを指定
+    /**
+     * 送信動画コーデックを指定
+     * @param targetTransceiver コーデックを指定するRTCRtpTransceiver
+     * @param videoCodecPriority 動画コーデックの優先度
+     */
     private setMediaChannelVideoCodec(targetTransceiver: RTCRtpTransceiver, videoCodecPriority: VideoCodec[]) {
         // 対応コーデックを取得
         const capabilities = RTCRtpSender.getCapabilities("video");
@@ -249,9 +243,25 @@ export class Connection {
         targetTransceiver.setCodecPreferences(newCodecCapabilities);
     }
 
-    // 送信音声コーデックを指定
+    /**
+     * 送信音声コーデックを指定
+     * @param targetTransceiver コーデックを指定するRTCRtpTransceiver
+     * @param audioCodecPriority 音声コーデックの優先度
+     */
     private setMediaChannelAudioCodec(targetTransceiver: RTCRtpTransceiver, audioCodecPriority: AudioCodec[]) {
+        // TODO: 実装する
+    }
 
+    // senderからtransceiverを取得する
+    private findSenderFromTransceiver(sender: RTCRtpSender) {
+        if (!this.peerConnection) {
+            return undefined;
+        }
+
+        const transceivers = this.peerConnection.getTransceivers();
+        return transceivers.find((item) => {
+            return item.sender === sender;
+        });
     }
 
     /**
