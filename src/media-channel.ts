@@ -3,29 +3,69 @@
  */
 export class SendMediaChannel {
     public readonly mediaStream: MediaStream;
-    private _enable: boolean;
+    private videoEnabled: boolean;
+    private audioEnabled: boolean;
     public readonly mediaCodecPriority: MediaCodecPriority | undefined;
     public readonly targetMediaBitrate: TargetMediaBitrate | undefined;
 
     /**
      * コンストラクタ
      * @param mediaStream 割り当てるMediaStream
-     * @param enable 最初の有効/無効状態
+     * @param videoEnabled 最初の動画有効/無効状態
+     * @param audioEnabled 最初の音声有効/無効状態
      * @param options SendMediaChannelのオプション
      */
-    public constructor(mediaStream: MediaStream, enable: boolean, options?: SendMediaChannelOption) {
+    public constructor(mediaStream: MediaStream, videoEnabled: boolean, audioEnabled: boolean, options?: SendMediaChannelOption) {
         this.mediaStream = mediaStream;
-        this._enable = enable;
+        this.videoEnabled = videoEnabled;
+        this.audioEnabled = audioEnabled;
         this.mediaCodecPriority = options?.mediaCodecPriority;
         this.targetMediaBitrate = options?.targetMediaBitrate;
     }
 
-    public get enable() {
-        return this._enable;
+    /**
+     * 動画の有効無効状態を切り替える
+     * @param enable 有効/無効
+     */
+    public setVideoEnabled(enable: boolean) {
+        this.videoEnabled = enable;
+        const videoTracks = this.mediaStream.getVideoTracks();
+        this.setTracksEnabled(videoTracks, enable);
     }
 
-    public set enable(enable: boolean) {
-        this._enable = enable;
+    /**
+     * 動画の有効無効状態を取得する
+     */
+    public getVideoEnabled() {
+        return this.videoEnabled;
+    }
+
+    /**
+     * 音声の有効無効状態を切り替える
+     * @param enable 有効/無効
+     */
+    public setAudioEnabled(enable: boolean) {
+        this.audioEnabled = enable;
+        const audioTracks = this.mediaStream.getAudioTracks();
+        this.setTracksEnabled(audioTracks, enable);
+    }
+
+    /**
+     * 音声の有効無効状態を取得する
+     */
+    public getAudioEnabled() {
+        return this.audioEnabled;
+    }
+
+    /**
+     * MediaStreamTrackの配列全てにenableを適用する
+     * @param tracks MediaStreamTrackの配列
+     * @param enable 有効/無効
+     */
+    private setTracksEnabled(tracks: MediaStreamTrack[], enable: boolean) {
+        for (const track of tracks) {
+            track.enabled = enable;
+        }
     }
 }
 
