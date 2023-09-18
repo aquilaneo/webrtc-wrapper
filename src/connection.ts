@@ -67,6 +67,7 @@ export class Connection {
         };
 
         this.peerConnection.ontrack = (e) => {
+            // TODO: ReceiveMediaStreamを生成するようにする
             const elem = document.getElementById("remote-video") as HTMLVideoElement;
             elem.srcObject = e.streams[0];
             elem.muted = true;

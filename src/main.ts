@@ -1,6 +1,8 @@
 import { Connection } from "./connection.ts";
 import { IceMode } from "./signaling.ts";
-import { SendMediaChannel } from "./media-channel.ts";
+import { SendMediaChannel, VideoCodec } from "./media-channel.ts";
+
+let sendMediaChannel: SendMediaChannel;
 
 function initialize() {
     const connection = new Connection("", IceMode.VanillaIce);
@@ -62,16 +64,20 @@ function initialize() {
         };
     }
 
-    // カメラ有効化ボタン
-    const enableCameraButton = document.getElementById("enable-camera-button");
-    if (enableCameraButton) {
-        enableCameraButton.onclick = async () => {
-            const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    width: 1920, height: 1080,
-                    facingMode: { exact: "environment" }
-                }, audio: true
+    // カメラ開始ボタン
+    const startCameraButton = document.getElementById("start-camera-button");
+    if (startCameraButton) {
+        startCameraButton.onclick = async () => {
+            // const mediaStream = await navigator.mediaDevices.getUserMedia({
+            //     video: {
+            //         width: 1280, height: 720, frameRate: 24,
+            //         facingMode: { exact: "environment" }
+            //     }, audio: true
+            // });
+            const mediaStream = await navigator.mediaDevices.getDisplayMedia({
+                video: true, audio: true
             });
+            console.log(mediaStream);
             const localVideoElem = document.getElementById("local-video") as HTMLVideoElement;
             localVideoElem.srcObject = mediaStream;
             localVideoElem.muted = true;
@@ -79,9 +85,34 @@ function initialize() {
                 localVideoElem.play();
             };
 
-            const sendMediaChannel = new SendMediaChannel(mediaStream, true);
+            sendMediaChannel = new SendMediaChannel(mediaStream, true, true, {
+                mediaCodecPriority: {
+                    video: [VideoCodec.AV1, VideoCodec.VP9]
+                },
+                targetMediaBitrate: {
+                    video: 5 * 1024,
+                }
+            });
             connection.addSendMediaChannel("camera", sendMediaChannel);
         };
+    }
+
+    // カメラ有効化ボタン
+    const enableCameraButton = document.getElementById("enable-camera-button");
+    if (enableCameraButton) {
+        enableCameraButton.onclick = () => {
+            sendMediaChannel.setVideoEnabled(true);
+            sendMediaChannel.setAudioEnabled(true);
+        };
+    }
+
+    // カメラ有効化ボタン
+    const disableCameraButton = document.getElementById("disable-camera-button");
+    if (disableCameraButton) {
+        disableCameraButton.onclick = () => {
+            sendMediaChannel.setVideoEnabled(false);
+            sendMediaChannel.setAudioEnabled(false);
+        }
     }
 
     // テストメッセージボタン
